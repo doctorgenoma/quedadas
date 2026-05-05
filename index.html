@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quedadas - Planificador</title>
+    <title>Quedadas Pro - Planificador</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // CONFIGURACIÓN PROPORCIONADA
         const firebaseConfig = {
             apiKey: "AIzaSyC6z7__Wzko5ZpgS1E6Zzd6FHJVoHn0Lvo",
             authDomain: "quedadas-doctorgenoma.firebaseapp.com",
@@ -24,16 +23,12 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // --- LÓGICA DE NAVEGACIÓN ---
         const urlParams = new URLSearchParams(window.location.search);
         const surveyId = urlParams.get('id');
 
         window.onload = () => {
-            if (surveyId) {
-                renderVoterView(surveyId);
-            } else {
-                renderAdminAuth();
-            }
+            if (surveyId) renderVoterView(surveyId);
+            else renderAdminAuth();
         };
 
         // --- VISTA DE VOTANTE ---
@@ -42,7 +37,7 @@
             const surveySnap = await getDoc(doc(db, "surveys", id));
 
             if (!surveySnap.exists()) {
-                container.innerHTML = `<h1 class="text-xl text-center mt-10">Encuesta no encontrada.</h1>`;
+                container.innerHTML = `<div class="text-center mt-20">❌ Encuesta no encontrada.</div>`;
                 return;
             }
 
@@ -50,40 +45,49 @@
             const hasVoted = localStorage.getItem(`voted_${id}`);
 
             container.innerHTML = `
-                <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg mt-10">
-                    <h1 class="text-2xl font-bold mb-2">${survey.title}</h1>
-                    <p class="text-gray-600 mb-6">Fecha: ${survey.date}</p>
+                <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-xl mt-10 border border-gray-100">
+                    <h1 class="text-3xl font-extrabold text-gray-800 mb-2">${survey.title}</h1>
+                    <p class="text-blue-600 font-medium mb-6">Selecciona todas las opciones que te vengan bien</p>
                     
                     <div id="voteForm" class="${hasVoted ? 'hidden' : ''}">
-                        <input type="text" id="voterName" placeholder="Tu nombre" class="w-full border p-2 rounded mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <p class="font-semibold mb-2">Selecciona tus horas disponibles:</p>
-                        <div class="space-y-2 mb-6">
-                            ${survey.hours.map(h => `
-                                <label class="flex items-center space-x-3 bg-gray-50 p-3 rounded cursor-pointer hover:bg-gray-100 transition">
-                                    <input type="checkbox" name="hours" value="${h}" class="w-5 h-5 text-blue-600">
-                                    <span>${h}</span>
-                                </label>
-                            `).join('')}
-                        </div>
-                        <button id="submitVote" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">Enviar Votación</button>
+                        <input type="text" id="voterName" placeholder="Escribe tu nombre..." class="w-full border-2 p-3 rounded-lg mb-6 focus:border-blue-500 outline-none transition-all">
+                        
+                        ${survey.dates.map((d, idx) => `
+                            <div class="mb-6">
+                                <h3 class="font-bold text-gray-700 border-b pb-1 mb-3">${d.date}</h3>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${d.hours.map(h => `
+                                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                                            <input type="checkbox" name="option" value="${d.date} | ${h}" class="w-5 h-5 mr-3">
+                                            <span class="text-sm font-medium">${h}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                        
+                        <button id="submitVote" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 shadow-lg transition-transform active:scale-95">Confirmar mi Votación</button>
                     </div>
 
                     <div id="resultsView" class="${hasVoted ? '' : 'hidden'}">
-                        <h2 class="font-bold text-lg mb-4">Resultados actuales:</h2>
-                        <div id="statsContainer" class="space-y-3">
-                            </div>
-                        <button onclick="localStorage.removeItem('voted_${id}'); location.reload();" class="mt-6 text-sm text-blue-500 underline">Cambiar mi voto</button>
+                        <div class="bg-green-50 p-4 rounded-lg mb-6 flex items-center text-green-700">
+                            <span class="mr-2">✅</span> Tu voto ha sido registrado.
+                        </div>
+                        <h2 class="font-bold text-xl mb-4 text-gray-800">Estado de la encuesta:</h2>
+                        <div id="statsContainer" class="space-y-6"></div>
+                        <button onclick="localStorage.removeItem('voted_${id}'); location.reload();" class="mt-8 text-sm text-gray-500 hover:text-blue-600 transition underline w-full text-center">Modificar mi respuesta</button>
                     </div>
                 </div>
             `;
 
-            if (hasVoted) loadLiveResults(id, survey.hours);
+            if (hasVoted) loadLiveResults(id, survey.dates);
 
             document.getElementById('submitVote')?.addEventListener('click', async () => {
-                const name = document.getElementById('voterName').value;
-                const selected = Array.from(document.querySelectorAll('input[name="hours"]:checked')).map(cb => cb.value);
+                const name = document.getElementById('voterName').value.trim();
+                const selected = Array.from(document.querySelectorAll('input[name="option"]:checked')).map(cb => cb.value);
                 
-                if (!name || selected.length === 0) return alert("Pon tu nombre y elige al menos una hora");
+                if (!name) return alert("Por favor, introduce tu nombre");
+                if (selected.length === 0) return alert("Selecciona al menos una opción");
 
                 await setDoc(doc(db, `surveys/${id}/votes`, name), {
                     name: name,
@@ -96,23 +100,36 @@
             });
         }
 
-        function loadLiveResults(id, allHours) {
+        function loadLiveResults(id, dates) {
             onSnapshot(collection(db, `surveys/${id}/votes`), (snap) => {
                 const stats = {};
-                allHours.forEach(h => stats[h] = 0);
                 snap.forEach(doc => {
-                    doc.data().choices.forEach(h => stats[h]++);
+                    doc.data().choices.forEach(choice => {
+                        stats[choice] = (stats[choice] || 0) + 1;
+                    });
                 });
 
                 const container = document.getElementById('statsContainer');
-                container.innerHTML = allHours.map(h => `
+                container.innerHTML = dates.map(d => `
                     <div>
-                        <div class="flex justify-between mb-1">
-                            <span class="text-sm font-medium">${h}</span>
-                            <span class="text-sm font-medium">${stats[h]} votos</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full" style="width: ${(stats[h]/(snap.size || 1))*100}%"></div>
+                        <h3 class="font-bold text-gray-600 text-sm mb-2 uppercase tracking-wider">${d.date}</h3>
+                        <div class="space-y-3">
+                            ${d.hours.map(h => {
+                                const key = `${d.date} | ${h}`;
+                                const count = stats[key] || 0;
+                                const percent = (count / (snap.size || 1)) * 100;
+                                return `
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span>${h}</span>
+                                            <span class="font-bold">${count} votos</span>
+                                        </div>
+                                        <div class="w-full bg-gray-100 rounded-full h-2">
+                                            <div class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                 `).join('');
@@ -122,61 +139,84 @@
         // --- VISTA DE ADMINISTRADOR ---
         function renderAdminAuth() {
             onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    renderAdminDashboard();
-                } else {
+                if (user) renderAdminDashboard();
+                else {
                     document.getElementById('app').innerHTML = `
-                        <div class="max-w-sm mx-auto mt-20 p-6 bg-white rounded-lg shadow-md">
-                            <h2 class="text-xl font-bold mb-4">Acceso Administrador</h2>
-                            <input type="email" id="email" placeholder="Email" class="w-full border p-2 mb-2 rounded">
-                            <input type="password" id="pass" placeholder="Contraseña" class="w-full border p-2 mb-4 rounded">
-                            <button id="loginBtn" class="w-full bg-black text-white py-2 rounded">Entrar</button>
+                        <div class="max-w-sm mx-auto mt-20 p-8 bg-white rounded-2xl shadow-2xl">
+                            <h2 class="text-2xl font-bold mb-6 text-center">Admin Quedadas</h2>
+                            <input type="email" id="email" placeholder="Email" class="w-full border p-3 mb-3 rounded-lg outline-none focus:ring-2 focus:ring-black">
+                            <input type="password" id="pass" placeholder="Contraseña" class="w-full border p-3 mb-6 rounded-lg outline-none focus:ring-2 focus:ring-black">
+                            <button id="loginBtn" class="w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition">Entrar al Panel</button>
                         </div>
                     `;
                     document.getElementById('loginBtn').addEventListener('click', () => {
                         signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)
-                        .catch(err => alert("Error: " + err.message));
+                        .catch(err => alert("Error de acceso: " + err.message));
                     });
                 }
             });
         }
 
-        async function renderAdminDashboard() {
+        function renderAdminDashboard() {
             const container = document.getElementById('app');
             container.innerHTML = `
                 <div class="max-w-4xl mx-auto p-6">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-2xl font-bold">Panel de Control</h1>
-                        <button onclick="signOut(getAuth())" class="text-red-500">Cerrar Sesión</button>
+                    <div class="flex justify-between items-center mb-10">
+                        <h1 class="text-3xl font-black italic">PANEL CONTROL</h1>
+                        <button onclick="signOut(getAuth())" class="bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold">Cerrar Sesión</button>
                     </div>
 
-                    <div class="bg-blue-50 p-6 rounded-lg mb-10 border border-blue-200">
-                        <h2 class="font-bold mb-4">Crear Nueva Encuesta</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" id="newTitle" placeholder="Título del evento" class="p-2 border rounded">
-                            <input type="date" id="newDate" class="p-2 border rounded">
-                            <input type="text" id="newHours" placeholder="Horas (ej: 18:00, 20:00, 22:30)" class="p-2 border rounded col-span-2">
-                            <button id="createBtn" class="bg-blue-600 text-white py-2 rounded col-span-2 font-bold hover:bg-blue-700">Generar Encuesta</button>
-                        </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 mb-10">
+                        <h2 class="text-xl font-bold mb-6 flex items-center"><span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">1</span> Nueva Encuesta</h2>
+                        <input type="text" id="newTitle" placeholder="Título del evento (ej: Cena de Navidad)" class="w-full text-lg border-b-2 p-2 mb-8 outline-none focus:border-blue-600">
+                        
+                        <div id="dateRows" class="space-y-4 mb-6">
+                            </div>
+                        
+                        <button id="addDateBtn" class="text-blue-600 font-bold text-sm hover:underline mb-8">+ Añadir otro día</button>
+                        
+                        <button id="createBtn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg">Publicar y Generar Enlace</button>
                     </div>
 
-                    <h2 class="font-bold text-xl mb-4">Tus Encuestas</h2>
-                    <div id="surveyList" class="space-y-4"></div>
+                    <h2 class="font-bold text-2xl mb-6">Encuestas Activas</h2>
+                    <div id="surveyList" class="grid gap-4"></div>
                 </div>
             `;
 
-            document.getElementById('createBtn').addEventListener('click', async () => {
+            // Lógica para filas dinámicas
+            const dateRows = document.getElementById('dateRows');
+            const addRow = () => {
+                const div = document.createElement('div');
+                div.className = "flex flex-col md:flex-row gap-3 p-4 bg-gray-50 rounded-lg relative group";
+                div.innerHTML = `
+                    <input type="date" class="row-date p-2 border rounded-md">
+                    <input type="text" placeholder="Horas separadas por coma (ej: 14:00, 21:00)" class="row-hours flex-1 p-2 border rounded-md">
+                    <button class="text-red-400 hover:text-red-600 font-bold px-2" onclick="this.parentElement.remove()">✕</button>
+                `;
+                dateRows.appendChild(div);
+            };
+
+            document.getElementById('addDateBtn').onclick = addRow;
+            addRow(); // Primera fila por defecto
+
+            document.getElementById('createBtn').onclick = async () => {
                 const title = document.getElementById('newTitle').value;
-                const date = document.getElementById('newDate').value;
-                const hours = document.getElementById('newHours').value.split(',').map(h => h.trim());
-                
-                if(!title || !date || hours.length === 0) return alert("Completa todos los campos");
+                const rows = document.querySelectorAll('#dateRows > div');
+                const datesData = [];
+
+                rows.forEach(row => {
+                    const d = row.querySelector('.row-date').value;
+                    const h = row.querySelector('.row-hours').value.split(',').map(i => i.trim()).filter(i => i !== "");
+                    if(d && h.length > 0) datesData.push({ date: d, hours: h });
+                });
+
+                if(!title || datesData.length === 0) return alert("Faltan datos");
 
                 await addDoc(collection(db, "surveys"), {
-                    title, date, hours, creator: auth.currentUser.uid, createdAt: Date.now()
+                    title, dates: datesData, createdAt: Date.now(), creator: auth.currentUser.uid
                 });
                 location.reload();
-            });
+            };
 
             loadSurveys();
         }
@@ -192,44 +232,42 @@
                 const url = `${window.location.origin}${window.location.pathname}?id=${id}`;
 
                 const card = document.createElement('div');
-                card.className = "bg-white p-4 rounded shadow border flex justify-between items-center";
+                card.className = "bg-white p-5 rounded-xl shadow-sm border flex flex-col md:flex-row justify-between items-start md:items-center gap-4";
                 card.innerHTML = `
-                    <div>
-                        <h3 class="font-bold">${s.title} (${s.date})</h3>
-                        <p class="text-xs text-gray-400">ID: ${id}</p>
-                        <input type="text" readonly value="${url}" class="text-sm text-blue-600 bg-gray-50 p-1 mt-2 w-full border-none focus:ring-0">
+                    <div class="flex-1">
+                        <h3 class="font-bold text-lg">${s.title}</h3>
+                        <div class="flex items-center mt-2">
+                            <input type="text" readonly value="${url}" class="text-xs text-blue-500 bg-blue-50 p-2 rounded w-full md:w-64 border-none">
+                            <button onclick="navigator.clipboard.writeText('${url}'); alert('Copiado');" class="ml-2 text-xs bg-gray-100 p-2 rounded">Copiar</button>
+                        </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <button onclick="exportCSV('${id}', '${s.title}')" class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm font-bold">CSV</button>
-                        <button onclick="deleteSurvey('${id}')" class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm font-bold">Borrar</button>
+                    <div class="flex gap-2">
+                        <button onclick="exportCSV('${id}', '${s.title}')" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold">Exportar CSV</button>
+                        <button onclick="deleteSurvey('${id}')" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold">Borrar</button>
                     </div>
                 `;
                 list.appendChild(card);
             });
         }
 
-        // --- FUNCIONES GLOBALES (ADMIN) ---
         window.exportCSV = async (id, title) => {
             const snap = await getDocs(collection(db, `surveys/${id}/votes`));
-            let csv = "Nombre,Opciones Elegidas\n";
+            let csv = "\uFEFFNombre,Opciones Seleccionadas\n";
             snap.forEach(doc => {
                 const data = doc.data();
                 csv += `"${data.name}","${data.choices.join(' | ')}"\n`;
             });
 
-            const blob = new Blob([csv], { type: 'text/csv' });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `resultados_${title}.csv`);
-            document.body.appendChild(a);
+            a.href = url;
+            a.download = `Votos_${title}.csv`;
             a.click();
-            document.body.removeChild(a);
         };
 
         window.deleteSurvey = async (id) => {
-            if(confirm("¿Seguro que quieres borrar esta encuesta?")) {
+            if(confirm("¿Seguro que quieres borrar la encuesta y todos sus votos?")) {
                 await deleteDoc(doc(db, "surveys", id));
                 location.reload();
             }
@@ -237,10 +275,10 @@
 
     </script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-50 min-h-screen text-gray-900 font-sans">
     <div id="app">
         <div class="flex justify-center items-center h-screen">
-            <p class="text-gray-500 animate-pulse">Cargando aplicación...</p>
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
         </div>
     </div>
 </body>
