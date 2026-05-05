@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quedadas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF8F4;
+    --surface: #FFFFFF;
+    --border: #E8E4DC;
+    --border-strong: #C8C4B8;
+    --text: #1A1814;
+    --text-muted: #6B6860;
+    --text-hint: #A8A59E;
+    --accent: #2D5A3D;
+    --accent-light: #EAF4EC;
+    --accent-mid: #4A8C62;
+    --danger: #B83232;
+    --danger-light: #FBF0F0;
+    --warn: #7A5C00;
+    --warn-light: #FFF8E0;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--text-muted); font-style: italic; }
+  .nav-actions { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: var(--radius);
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; border: none; text-decoration: none;
+  }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bg); color: var(--text); border-color: var(--border-strong); }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #245030; }
+  .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #F0CCCC; }
+  .btn-danger:hover { background: #F5D5D5; }
+  .btn-sm { padding: 5px 12px; font-size: 13px; }
+
+  /* ─── LAYOUT ─── */
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-hint);
+    margin-bottom: 12px;
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow);
+    padding: 24px; margin-bottom: 16px;
+  }
+  .card-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 16px; gap: 12px;
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px; color: var(--text); line-height: 1.2;
+  }
+  .card-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ─── FORMS ─── */
+  .form-group { margin-bottom: 18px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+  input[type=text], input[type=date], input[type=time], input[type=password], select, textarea {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-family: inherit; font-size: 15px;
+    background: var(--bg); color: var(--text); transition: border-color 0.15s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent-mid); box-shadow: 0 0 0 3px rgba(74,140,98,0.12);
+  }
+  input::placeholder { color: var(--text-hint); }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* ─── TIME CHIPS ─── */
+  .time-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .time-chip {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--accent-light); color: var(--accent);
+    border: 1px solid #BFE0CA; border-radius: 20px;
+    padding: 4px 10px; font-size: 13px; font-weight: 500;
+  }
+  .time-chip button {
+    background: none; border: none; cursor: pointer;
+    color: var(--accent); font-size: 15px; line-height: 1;
+    padding: 0 0 0 2px; display: flex; align-items: center;
+  }
+  .time-chip button:hover { color: var(--danger); }
+
+  .add-time-row { display: flex; gap: 8px; align-items: flex-end; }
+  .add-time-row input { flex: 1; }
+
+  /* ─── DATE SLOTS ─── */
+  .slot-list { display: flex; flex-direction: column; gap: 10px; }
+  .slot-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 14px;
+    font-size: 14px;
+  }
+  .slot-item-left { display: flex; flex-direction: column; gap: 2px; }
+  .slot-date { font-weight: 500; }
+  .slot-times { font-size: 12px; color: var(--text-muted); }
+
+  /* ─── POLLS LIST ─── */
+  .polls-list { display: flex; flex-direction: column; gap: 12px; }
+  .poll-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 18px 20px;
+    cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow);
+  }
+  .poll-card:hover { border-color: var(--accent-mid); box-shadow: var(--shadow-md); }
+  .poll-card-title { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 4px; }
+  .poll-card-meta { font-size: 13px; color: var(--text-muted); display: flex; gap: 16px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  }
+  .pill-green { background: var(--accent-light); color: var(--accent); }
+  .pill-gray { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+  /* ─── VOTE VIEW ─── */
+  .vote-table-wrap { overflow-x: auto; margin-top: 8px; }
+  .vote-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  .vote-table th {
+    text-align: left; font-size: 12px; font-weight: 600;
+    color: var(--text-muted); padding: 8px 12px; border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .vote-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .vote-table tr:last-child td { border-bottom: none; }
+  .vote-table tr:hover td { background: var(--bg); }
+  .option-col { font-weight: 500; min-width: 140px; }
+  .option-col .opt-date { color: var(--text); }
+  .option-col .opt-time { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+
+  .check-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid var(--border-strong); background: var(--surface);
+    cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .check-btn.checked { background: var(--accent); border-color: var(--accent); color: white; }
+  .check-btn:hover:not(.checked) { border-color: var(--accent-mid); background: var(--accent-light); }
+
+  .count-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 13px; font-weight: 500; color: var(--text-muted);
+  }
+  .count-badge.popular { color: var(--accent); font-weight: 600; }
+
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar { height: 6px; border-radius: 3px; background: var(--accent); transition: width 0.3s; min-width: 2px; }
+  .bar-bg { flex: 1; height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; }
+  .bar-inner { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.3s; }
+
+  .name-input-row {
+    display: flex; gap: 8px; align-items: flex-end; margin-bottom: 20px;
+    padding: 16px; background: var(--accent-light); border-radius: var(--radius);
+    border: 1px solid #BFE0CA;
+  }
+  .name-input-row .form-group { flex: 1; margin: 0; }
+  .name-tag {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--accent); color: white;
+    border-radius: var(--radius); padding: 8px 14px;
+    font-size: 14px; font-weight: 500;
+  }
+  .name-tag button {
+    background: none; border: none; cursor: pointer;
+    color: white; opacity: 0.7; font-size: 16px; line-height: 1;
+    padding: 0; display: flex; align-items: center;
+  }
+  .name-tag button:hover { opacity: 1; }
+
+  /* ─── MODAL ─── */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35); z-index: 200;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 28px; max-width: 440px; width: 100%;
+    box-shadow: var(--shadow-md); position: relative;
+  }
+  .modal h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 6px; }
+  .modal p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--text); color: white;
+    padding: 12px 20px; border-radius: var(--radius);
+    font-size: 14px; font-weight: 500;
+    opacity: 0; transform: translateY(8px);
+    transition: all 0.25s; pointer-events: none; z-index: 300;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state h3 { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ─── TABS ─── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .tab-btn {
+    padding: 10px 18px; background: none; border: none; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    color: var(--text-muted); border-bottom: 2px solid transparent;
+    margin-bottom: -1px; transition: all 0.15s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  /* ─── DIVIDER ─── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* ─── ALERT ─── */
+  .alert {
+    padding: 12px 16px; border-radius: var(--radius); font-size: 14px; margin-bottom: 16px;
+  }
+  .alert-warn { background: var(--warn-light); color: var(--warn); border: 1px solid #E8D080; }
+  .alert-success { background: var(--accent-light); color: var(--accent); border: 1px solid #BFE0CA; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 560px) {
+    .row, .row-3 { grid-template-columns: 1fr; }
+    .container { padding: 20px 12px 80px; }
+  }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--text-muted); font-size: 14px; cursor: pointer;
+    background: none; border: none; font-family: inherit;
+    padding: 0; margin-bottom: 20px; transition: color 0.15s;
+  }
+  .back-btn:hover { color: var(--text); }
+
+  /* ─── SHARE URL ─── */
+  .share-box {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 14px;
+    font-size: 13px; color: var(--text-muted);
+    word-break: break-all; font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">quedadas<span>.</span></div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost btn-sm" id="nav-admin-btn" onclick="openAdminModal()">Administrar</button>
+    <button class="btn btn-primary btn-sm" id="nav-create-btn" onclick="showView('create')">+ Nueva encuesta</button>
+  </div>
+</nav>
+
+<!-- ────────────── VIEW: LIST ────────────── -->
+<div class="view active" id="view-list">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <div class="section-label">Encuestas activas</div>
+        <h1 style="font-family:'DM Serif Display',serif;font-size:28px;line-height:1.2;">¿Cuándo quedamos?</h1>
+      </div>
+    </div>
+    <div class="polls-list" id="polls-list"></div>
+  </div>
+</div>
+
+<!-- ────────────── VIEW: CREATE ────────────── -->
+<div class="view" id="view-create">
+  <div class="container">
+    <button class="back-btn" onclick="showView('list')">← Volver</button>
+    <div class="section-label">Nueva encuesta</div>
+    <h1 style="font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:24px;">Crear nueva quedada</h1>
+
+    <div class="card">
+      <div class="form-group">
+        <label>Título del evento *</label>
+        <input type="text" id="ev-title" placeholder="Ej: Cena de cumpleaños, Partido de padel…">
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-label">Añadir fecha y horas</div>
+
+      <div class="row" style="margin-bottom:12px;">
+        <div class="form-group" style="margin:0;">
+          <label>Día</label>
+          <input type="number" id="new-day" min="1" max="31" placeholder="DD">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>Mes</label>
+          <select id="new-month">
+            <option value="">Mes</option>
+            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+            <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+            <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+            <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Año</label>
+        <input type="number" id="new-year" min="2024" max="2030" placeholder="AAAA">
+      </div>
+
+      <div class="form-group">
+        <label>Horas del día disponibles</label>
+        <div class="add-time-row">
+          <input type="time" id="new-time" style="max-width:160px;">
+          <button class="btn btn-ghost btn-sm" onclick="addTime()">+ Añadir hora</button>
+        </div>
+        <div class="time-chips" id="time-chips"></div>
+      </div>
+
+      <button class="btn btn-ghost" onclick="addSlot()" style="width:100%;justify-content:center;">
+        + Añadir esta fecha a la encuesta
+      </button>
+
+      <hr class="divider">
+
+      <div class="section-label">Fechas añadidas</div>
+      <div class="slot-list" id="slot-list">
+        <div style="color:var(--text-hint);font-size:14px;">Todavía no has añadido ninguna fecha.</div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="form-group">
+        <label>PIN de administrador (para exportar resultados)</label>
+        <input type="password" id="ev-pin" placeholder="Mínimo 4 caracteres" maxlength="20">
+        <div style="font-size:12px;color:var(--text-hint);margin-top:4px;">Solo tú debes conocer este PIN. No se puede recuperar si lo olvidas.</div>
+      </div>
+
+      <button class="btn btn-primary" onclick="createPoll()" style="width:100%;justify-content:center;padding:12px;">
+        Crear encuesta
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────── VIEW: VOTE ────────────── -->
+<div class="view" id="view-vote">
+  <div class="container">
+    <button class="back-btn" onclick="showView('list')">← Volver a las encuestas</button>
+
+    <div id="vote-header"></div>
+
+    <!-- Name entry -->
+    <div id="name-section">
+      <div class="name-input-row" id="name-input-area">
+        <div class="form-group">
+          <label>Tu nombre (para registrar tus votos)</label>
+          <input type="text" id="voter-name-input" placeholder="Escribe tu nombre…" maxlength="40">
+        </div>
+        <button class="btn btn-primary" onclick="setVoterName()">Entrar</button>
+      </div>
+      <div id="name-tag-area" style="display:none;margin-bottom:20px;">
+        <div class="name-tag" id="active-name-tag"></div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="vote-table-wrap">
+        <table class="vote-table" id="vote-table">
+          <thead><tr id="vote-thead"></tr></thead>
+          <tbody id="vote-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <p style="font-size:13px;color:var(--text-muted);">Puedes cambiar tus respuestas en cualquier momento.</p>
+      <button class="btn btn-ghost btn-sm" id="admin-export-btn" onclick="openAdminModal('vote')">Exportar CSV (admin)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────── MODAL: ADMIN ────────────── -->
+<div class="modal-backdrop" id="admin-modal">
+  <div class="modal">
+    <h2>Acceso administrador</h2>
+    <p>Introduce el PIN de esta encuesta para exportar los resultados completos con nombres.</p>
+    <div class="form-group">
+      <label>PIN</label>
+      <input type="password" id="admin-pin-input" placeholder="PIN de la encuesta" onkeydown="if(event.key==='Enter')verifyAdmin()">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeAdminModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="verifyAdmin()">Acceder y exportar</button>
+    </div>
+    <div id="admin-error" style="color:var(--danger);font-size:13px;margin-top:10px;display:none;">PIN incorrecto. Inténtalo de nuevo.</div>
+  </div>
+</div>
+
+<!-- ────────────── MODAL: DELETE CONFIRM ────────────── -->
+<div class="modal-backdrop" id="delete-modal">
+  <div class="modal">
+    <h2>Eliminar encuesta</h2>
+    <p>¿Seguro que quieres eliminar esta encuesta? Se borrarán todos los votos. Esta acción no se puede deshacer.</p>
+    <div class="form-group">
+      <label>PIN de administrador</label>
+      <input type="password" id="delete-pin-input" placeholder="PIN" onkeydown="if(event.key==='Enter')confirmDelete()">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('delete-modal').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Eliminar</button>
+    </div>
+    <div id="delete-error" style="color:var(--danger);font-size:13px;margin-top:10px;display:none;">PIN incorrecto.</div>
+  </div>
+</div>
+
+<!-- ────────────── TOAST ────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA LAYER — localStorage
+// ══════════════════════════════════════════
+
+const STORAGE_KEY = 'quedadas_v1';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { polls: [] }; }
+  catch { return { polls: [] }; }
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+function getData() { return loadData(); }
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+
+let currentPollId = null;
+let currentVoterName = null;
+let pendingSlots = []; // [{date, label, times:[]}]
+let pendingTimes = [];
+let adminContext = null; // 'list' | 'vote' | 'delete'
+let deletePollId = null;
+
+// ══════════════════════════════════════════
+// VIEW ROUTER
+// ══════════════════════════════════════════
+
+function showView(v, pollId) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  if (v === 'list') {
+    renderList();
+    currentPollId = null;
+    currentVoterName = null;
+  } else if (v === 'create') {
+    resetCreateForm();
+  } else if (v === 'vote' && pollId) {
+    currentPollId = pollId;
+    currentVoterName = null;
+    renderVoteView();
+  }
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════
+// LIST VIEW
+// ══════════════════════════════════════════
+
+function renderList() {
+  const data = getData();
+  const el = document.getElementById('polls-list');
+  if (!data.polls.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="icon">📅</div>
+      <h3>Sin encuestas todavía</h3>
+      <p>Crea tu primera quedada con el botón de arriba.</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = data.polls.map(p => {
+    const voterCount = Object.keys(p.votes || {}).length;
+    const optCount = (p.slots || []).reduce((a, s) => a + (s.times.length || 1), 0);
+    return `<div class="poll-card" onclick="showView('vote','${p.id}')">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div style="flex:1;">
+          <div class="poll-card-title">${esc(p.title)}</div>
+          <div class="poll-card-meta">
+            <span>${optCount} opción${optCount !== 1 ? 'es' : ''}</span>
+            <span>${voterCount} voto${voterCount !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <span class="pill pill-green">Activa</span>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();openDeleteModal('${p.id}')">Eliminar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// CREATE VIEW
+// ══════════════════════════════════════════
+
+const MONTHS = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function resetCreateForm() {
+  pendingSlots = [];
+  pendingTimes = [];
+  document.getElementById('ev-title').value = '';
+  document.getElementById('ev-pin').value = '';
+  document.getElementById('new-day').value = '';
+  document.getElementById('new-month').value = '';
+  document.getElementById('new-year').value = '';
+  document.getElementById('new-time').value = '';
+  document.getElementById('time-chips').innerHTML = '';
+  renderSlotList();
+}
+
+function addTime() {
+  const t = document.getElementById('new-time').value;
+  if (!t) { toast('Selecciona una hora'); return; }
+  if (pendingTimes.includes(t)) { toast('Esa hora ya está añadida'); return; }
+  pendingTimes.push(t);
+  renderTimeChips();
+  document.getElementById('new-time').value = '';
+}
+
+function removeTime(i) {
+  pendingTimes.splice(i, 1);
+  renderTimeChips();
+}
+
+function renderTimeChips() {
+  document.getElementById('time-chips').innerHTML = pendingTimes.map((t, i) =>
+    `<div class="time-chip">${fmtTime(t)}<button onclick="removeTime(${i})">×</button></div>`
+  ).join('');
+}
+
+function addSlot() {
+  const day = parseInt(document.getElementById('new-day').value);
+  const month = parseInt(document.getElementById('new-month').value);
+  const year = parseInt(document.getElementById('new-year').value);
+  if (!day || !month || !year) { toast('Rellena día, mes y año'); return; }
+  if (day < 1 || day > 31) { toast('Día inválido'); return; }
+  if (year < 2024 || year > 2030) { toast('Año inválido'); return; }
+  const dateKey = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const label = `${day} de ${MONTHS[month]} de ${year}`;
+  const times = [...pendingTimes];
+  if (pendingSlots.find(s => s.dateKey === dateKey)) { toast('Esa fecha ya está añadida'); return; }
+  pendingSlots.push({ dateKey, label, times });
+  pendingTimes = [];
+  renderTimeChips();
+  renderSlotList();
+  document.getElementById('new-day').value = '';
+  document.getElementById('new-month').value = '';
+  document.getElementById('new-year').value = '';
+  toast('Fecha añadida');
+}
+
+function removeSlot(i) {
+  pendingSlots.splice(i, 1);
+  renderSlotList();
+}
+
+function renderSlotList() {
+  const el = document.getElementById('slot-list');
+  if (!pendingSlots.length) {
+    el.innerHTML = '<div style="color:var(--text-hint);font-size:14px;">Todavía no has añadido ninguna fecha.</div>';
+    return;
+  }
+  el.innerHTML = pendingSlots.map((s, i) => `
+    <div class="slot-item">
+      <div class="slot-item-left">
+        <div class="slot-date">${esc(s.label)}</div>
+        <div class="slot-times">${s.times.length ? s.times.map(fmtTime).join(' · ') : 'Sin hora específica (todo el día)'}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeSlot(${i})">Quitar</button>
+    </div>
+  `).join('');
+}
+
+function createPoll() {
+  const title = document.getElementById('ev-title').value.trim();
+  const pin = document.getElementById('ev-pin').value.trim();
+  if (!title) { toast('Escribe el título del evento'); return; }
+  if (!pendingSlots.length) { toast('Añade al menos una fecha'); return; }
+  if (!pin || pin.length < 4) { toast('El PIN debe tener al menos 4 caracteres'); return; }
+
+  // Expand slots: if times exist, each time is an option; else the date alone is an option
+  const options = [];
+  pendingSlots.forEach(s => {
+    if (s.times.length) {
+      s.times.forEach(t => options.push({ id: uid(), dateKey: s.dateKey, label: s.label, time: t }));
+    } else {
+      options.push({ id: uid(), dateKey: s.dateKey, label: s.label, time: null });
+    }
+  });
+
+  const poll = {
+    id: uid(),
+    title,
+    pin: simpleHash(pin),
+    slots: pendingSlots,
+    options,
+    votes: {}, // { voterName: [optionId, ...] }
+    createdAt: Date.now()
+  };
+
+  const data = getData();
+  data.polls.unshift(poll);
+  saveData(data);
+  toast('¡Encuesta creada!');
+  showView('list');
+}
+
+// ══════════════════════════════════════════
+// VOTE VIEW
+// ══════════════════════════════════════════
+
+function renderVoteView() {
+  const data = getData();
+  const poll = data.polls.find(p => p.id === currentPollId);
+  if (!poll) { showView('list'); return; }
+
+  // Header
+  document.getElementById('vote-header').innerHTML = `
+    <div style="margin-bottom:24px;">
+      <h1 style="font-family:'DM Serif Display',serif;font-size:28px;line-height:1.2;margin-bottom:6px;">${esc(poll.title)}</h1>
+      <div style="font-size:14px;color:var(--text-muted);">
+        ${Object.keys(poll.votes).length} participant${Object.keys(poll.votes).length !== 1 ? 'es' : 'e'} ·
+        ${poll.options.length} opcion${poll.options.length !== 1 ? 'es' : ''}
+      </div>
+    </div>
+  `;
+
+  // Name area
+  const nameInputArea = document.getElementById('name-input-area');
+  const nameTagArea = document.getElementById('name-tag-area');
+  if (currentVoterName) {
+    nameInputArea.style.display = 'none';
+    nameTagArea.style.display = 'block';
+    document.getElementById('active-name-tag').innerHTML =
+      `Votando como: <strong>${esc(currentVoterName)}</strong>
+       <button onclick="clearVoterName()" title="Cambiar nombre">×</button>`;
+  } else {
+    nameInputArea.style.display = 'flex';
+    nameTagArea.style.display = 'none';
+  }
+
+  renderVoteTable(poll);
+}
+
+function renderVoteTable(poll) {
+  const voterVotes = currentVoterName ? (poll.votes[currentVoterName] || []) : [];
+  const totalVoters = Object.keys(poll.votes).length;
+
+  // Count votes per option
+  const counts = {};
+  poll.options.forEach(o => { counts[o.id] = 0; });
+  Object.values(poll.votes).forEach(optIds => {
+    optIds.forEach(id => { if (counts[id] !== undefined) counts[id]++; });
+  });
+  const maxCount = Math.max(...Object.values(counts), 1);
+
+  // Group options by date
+  const byDate = {};
+  poll.options.forEach(o => {
+    if (!byDate[o.dateKey]) byDate[o.dateKey] = { label: o.label, opts: [] };
+    byDate[o.dateKey].opts.push(o);
+  });
+
+  let tbody = '';
+  Object.entries(byDate).forEach(([dk, group]) => {
+    tbody += `<tr><td colspan="3" style="background:var(--bg);font-size:12px;font-weight:600;color:var(--text-muted);letter-spacing:0.04em;padding:8px 12px;">${esc(group.label)}</td></tr>`;
+    group.opts.forEach(o => {
+      const checked = voterVotes.includes(o.id);
+      const count = counts[o.id];
+      const pct = totalVoters ? Math.round(count / totalVoters * 100) : 0;
+      const isTop = count === maxCount && count > 0;
+      tbody += `<tr>
+        <td class="option-col">
+          <div class="opt-date">${o.time ? fmtTime(o.time) : 'Todo el día'}</div>
+        </td>
+        <td style="width:36px;text-align:center;">
+          <button class="check-btn ${checked ? 'checked' : ''}"
+            onclick="${currentVoterName ? `toggleVote('${o.id}')` : 'promptName()'}"
+            title="${checked ? 'Quitar voto' : 'Votar'}">${checked ? '✓' : ''}</button>
+        </td>
+        <td style="min-width:140px;">
+          <div class="bar-wrap">
+            <div class="bar-bg"><div class="bar-inner" style="width:${pct}%;background:${isTop ? 'var(--accent)' : 'var(--border-strong)'};"></div></div>
+            <span class="count-badge ${isTop ? 'popular' : ''}">${count}</span>
+          </div>
+        </td>
+      </tr>`;
+    });
+  });
+
+  document.getElementById('vote-thead').innerHTML = `
+    <th class="option-col">Opción</th>
+    <th style="width:36px;text-align:center;">${currentVoterName ? 'Tú' : ''}</th>
+    <th style="min-width:140px;">Votos</th>
+  `;
+  document.getElementById('vote-tbody').innerHTML = tbody;
+}
+
+function setVoterName() {
+  const name = document.getElementById('voter-name-input').value.trim();
+  if (!name) { toast('Escribe tu nombre'); return; }
+  currentVoterName = name;
+  document.getElementById('voter-name-input').value = '';
+  renderVoteView();
+}
+
+function clearVoterName() {
+  currentVoterName = null;
+  renderVoteView();
+}
+
+function promptName() {
+  toast('Primero escribe tu nombre para votar');
+  document.getElementById('voter-name-input').focus();
+}
+
+function toggleVote(optId) {
+  if (!currentVoterName) { promptName(); return; }
+  const data = getData();
+  const poll = data.polls.find(p => p.id === currentPollId);
+  if (!poll) return;
+  if (!poll.votes[currentVoterName]) poll.votes[currentVoterName] = [];
+  const idx = poll.votes[currentVoterName].indexOf(optId);
+  if (idx >= 0) poll.votes[currentVoterName].splice(idx, 1);
+  else poll.votes[currentVoterName].push(optId);
+  saveData(data);
+  renderVoteTable(poll);
+}
+
+// ══════════════════════════════════════════
+// ADMIN — EXPORT CSV
+// ══════════════════════════════════════════
+
+function openAdminModal(ctx) {
+  adminContext = ctx || 'list';
+  document.getElementById('admin-pin-input').value = '';
+  document.getElementById('admin-error').style.display = 'none';
+  document.getElementById('admin-modal').classList.add('open');
+  setTimeout(() => document.getElementById('admin-pin-input').focus(), 80);
+}
+
+function closeAdminModal() {
+  document.getElementById('admin-modal').classList.remove('open');
+}
+
+function verifyAdmin() {
+  const pin = document.getElementById('admin-pin-input').value;
+  const data = getData();
+  const poll = data.polls.find(p => p.id === currentPollId);
+
+  if (!poll) {
+    // Export all polls if no specific poll
+    document.getElementById('admin-error').style.display = 'block';
+    document.getElementById('admin-error').textContent = 'No hay encuesta seleccionada.';
+    return;
+  }
+
+  if (simpleHash(pin) !== poll.pin) {
+    document.getElementById('admin-error').style.display = 'block';
+    document.getElementById('admin-error').textContent = 'PIN incorrecto. Inténtalo de nuevo.';
+    return;
+  }
+
+  closeAdminModal();
+  exportCSV(poll);
+}
+
+function exportCSV(poll) {
+  // Build option map
+  const optMap = {};
+  poll.options.forEach(o => { optMap[o.id] = o; });
+
+  // Headers: Nombre + each option
+  const optHeaders = poll.options.map(o => {
+    const opt = optMap[o.id];
+    return `"${opt.label}${opt.time ? ' ' + fmtTime(opt.time) : ''}"`;
+  });
+  const headers = ['Nombre', ...optHeaders].join(',');
+
+  // Rows
+  const rows = Object.entries(poll.votes).map(([name, votedIds]) => {
+    const cols = poll.options.map(o => votedIds.includes(o.id) ? 'Sí' : 'No');
+    return [`"${name}"`, ...cols].join(',');
+  });
+
+  // Summary row
+  const counts = {};
+  poll.options.forEach(o => { counts[o.id] = 0; });
+  Object.values(poll.votes).forEach(ids => ids.forEach(id => { if (counts[id] !== undefined) counts[id]++; }));
+  const sumCols = poll.options.map(o => counts[o.id]);
+  rows.push(['TOTAL', ...sumCols].join(','));
+
+  const csv = [headers, ...rows].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${poll.title.replace(/[^a-z0-9]/gi,'_')}_resultados.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exportado');
+}
+
+// ══════════════════════════════════════════
+// DELETE POLL
+// ══════════════════════════════════════════
+
+function openDeleteModal(pollId) {
+  deletePollId = pollId;
+  document.getElementById('delete-pin-input').value = '';
+  document.getElementById('delete-error').style.display = 'none';
+  document.getElementById('delete-modal').classList.add('open');
+  setTimeout(() => document.getElementById('delete-pin-input').focus(), 80);
+}
+
+function confirmDelete() {
+  const pin = document.getElementById('delete-pin-input').value;
+  const data = getData();
+  const poll = data.polls.find(p => p.id === deletePollId);
+  if (!poll) { document.getElementById('delete-modal').classList.remove('open'); return; }
+  if (simpleHash(pin) !== poll.pin) {
+    document.getElementById('delete-error').style.display = 'block';
+    return;
+  }
+  data.polls = data.polls.filter(p => p.id !== deletePollId);
+  saveData(data);
+  document.getElementById('delete-modal').classList.remove('open');
+  toast('Encuesta eliminada');
+  renderList();
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtTime(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':');
+  return `${h}:${m}`;
+}
+
+function simpleHash(s) {
+  // Simple deterministic hash — good enough for local storage PIN
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = (h * 33) ^ s.charCodeAt(i);
+  return (h >>> 0).toString(16);
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// Close modals on backdrop click
+document.getElementById('admin-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeAdminModal();
+});
+document.getElementById('delete-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+renderList();
+</script>
+</body>
+</html>
